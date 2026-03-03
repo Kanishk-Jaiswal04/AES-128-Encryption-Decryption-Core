@@ -10,7 +10,7 @@ module AES_encryption_block_tb;
     logic done;
 
     // DUT Instance
-    AES_encryption_block dut (.*);
+    AES_encryption_core dut (.*);
 
     // Clock Generation
     initial clk = 0;
