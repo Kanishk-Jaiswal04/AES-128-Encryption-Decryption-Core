@@ -3,7 +3,7 @@
 module tb_axi_aes;
 
     // --- 1. Parameters & Signals ---
-    localparam CLK_PERIOD = 10; // 100MHz
+    localparam CLK_PERIOD = 10;
     
     reg clk;
     reg rst_n;
@@ -31,16 +31,15 @@ module tb_axi_aes;
     real start_time, end_time, total_ns;
     real throughput_mbps;
     reg [31:0] status_reg;
-    
+
+     //--Check the memory integrity from the waveform--
     wire [127:0] slv_mem0 = {dut.slv_mem [0], dut.slv_mem [1], dut.slv_mem [2], dut.slv_mem [3]};
-    
 
     // --- 2. Clock Generator ---
     initial clk = 0;
     always #(CLK_PERIOD/2) clk = ~clk;
 
     // --- 3. DUT Instantiation ---
-    // Ensure the port names match your top-level AXI Slave
     AES_AXI_Lite_slave dut (
         .S_AXI_ACLK    (clk),
         .S_AXI_ARESETN (rst_n),
@@ -120,9 +119,6 @@ module tb_axi_aes;
         axi_write(32'h1C, 32'hE93D7E11);
         axi_write(32'h20, 32'h7393E722);
 
-        $display("--- Starting Execution & Timing ---");
-        start_time = $realtime;
-
         // Trigger START (Write 1 to Control Reg at 0x00)
         axi_write(32'h00, 32'h00000001);
 
@@ -133,23 +129,6 @@ module tb_axi_aes;
             // Optional: small delay between polls to mimic real CPU
             #(CLK_PERIOD * 2); 
         end
-
-        end_time = $realtime;
-        
-        // --- 6. Results Calculation ---
-        total_ns = end_time - start_time;
-        // Throughput = (Bits / Time_ns) * 1000 (to get Mbps)
-        throughput_mbps = (128.0 / total_ns) * 1000.0;
-
-        $display("\n========================================");
-        $display("  AES PERFORMANCE REPORT (AXI-LITE)");
-        $display("========================================");
-        $display("  Total Time:   %0.2f ns", total_ns);
-        $display("  Clock Cycles: %0d", total_ns / CLK_PERIOD);
-        $display("  Throughput:   %0.2f Mbps", throughput_mbps);
-        $display("========================================\n");
-
-        #(CLK_PERIOD * 10);
         $finish;
     end
 
